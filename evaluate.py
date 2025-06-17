@@ -8,10 +8,6 @@ from sklearn.metrics import classification_report, confusion_matrix
 from config import Config
 from train import MemeDataset, MultiModalClassifier
 
-class MemeDatasetEval(MemeDataset):
-    """Evaluation dataset class (inherits from training dataset)"""
-    pass
-
 def evaluate():
     Config.setup_directories()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -25,7 +21,7 @@ def evaluate():
 
     # Initialize tokenizer and dataset
     tokenizer = BertTokenizer.from_pretrained(Config.BERT_MODEL_NAME)
-    test_dataset = MemeDatasetEval(Config.TEST_ANNOTATIONS, Config.IMAGE_DIR, tokenizer, transform)
+    test_dataset = MemeDataset(Config.TEST_ANNOTATIONS, Config.IMAGE_DIR, tokenizer, transform)
     test_loader = DataLoader(test_dataset, batch_size=Config.BATCH_SIZE)
 
     # Load model

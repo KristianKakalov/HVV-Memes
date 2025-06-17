@@ -14,7 +14,6 @@ class MemeDatasetEval(MemeDataset):
 
 def evaluate():
     Config.setup_directories()
-    print(f"==CUDA: {torch.cuda.is_available()}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Data transformations

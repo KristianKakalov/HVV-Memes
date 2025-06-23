@@ -30,7 +30,7 @@ class Config:
     LABEL2IDX = {label: idx for idx, label in enumerate(ROLE_LABELS)}
     
     # Focal loss parameters
-    FOCAL_LOSS_ALPHA = [1.0, 2.0, 2.0, 0.5]  # weights per class
+    FOCAL_LOSS_ALPHA = [3.0, 1.5, 2.2, 0.5]  # weights per class
     FOCAL_LOSS_GAMMA = 2
     
     @classmethod

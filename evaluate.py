@@ -1,4 +1,3 @@
-# evaluate.py
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -12,24 +11,20 @@ def evaluate():
     Config.setup_directories()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Data transformations
     transform = transforms.Compose([
         transforms.Resize(Config.IMAGE_SIZE),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    # Initialize tokenizer and dataset
     tokenizer = BertTokenizer.from_pretrained(Config.BERT_MODEL_NAME)
     test_dataset = MemeDataset(Config.TEST_ANNOTATIONS, Config.IMAGE_DIR, tokenizer, transform)
     test_loader = DataLoader(test_dataset, batch_size=Config.BATCH_SIZE)
 
-    # Load model
     model = MultiModalClassifier().to(device)
     model.load_state_dict(torch.load(Config.MODEL_DIR / "meme_classifier_best.pt"))
     model.eval()
 
-    # Evaluation
     all_preds, all_labels = [], []
     with torch.no_grad():
         for batch in test_loader:
@@ -42,7 +37,6 @@ def evaluate():
             all_preds.extend(preds)
             all_labels.extend(labels)
 
-    # Metrics
     print("\nTest Classification Report:")
     print(classification_report(
         all_labels, all_preds,
@@ -50,7 +44,6 @@ def evaluate():
         zero_division=0
     ))
 
-    # Confusion matrix
     cm = confusion_matrix(
         [label.argmax() for label in all_labels],
         [pred.argmax() for pred in all_preds]

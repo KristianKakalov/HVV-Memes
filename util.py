@@ -1,4 +1,3 @@
-# train.py
 import json
 import torch
 import torch.nn as nn
@@ -45,17 +44,15 @@ class MemeDataset(Dataset):
         image_path = self.image_dir / item["image"]
         doc = self.nlp(ocr_text)
         
-        # Extract and clean entities
         entities = list(set(
             ent.text.strip().lower() 
             for ent in doc.ents 
             if ent.text.strip()
         ))
 
-        # Initialize default labels
-        labels = {ent: [0, 0, 0, 1] for ent in entities}  # Default: other
+        # default: other
+        labels = {ent: [0, 0, 0, 1] for ent in entities}  
 
-        # Update labels from annotations
         for role in ["hero", "villain", "victim"]:
             for ent in item.get(role, []):
                 ent = ent.strip().lower()
@@ -64,7 +61,6 @@ class MemeDataset(Dataset):
                 labels[ent][Config.LABEL2IDX[role]] = 1
                 labels[ent][Config.LABEL2IDX["other"]] = 0
 
-        # Add samples to dataset
         for ent, label in labels.items():
             self.samples.append((
                 ocr_text,
@@ -79,11 +75,9 @@ class MemeDataset(Dataset):
     def __getitem__(self, idx):
         ocr_text, image_path, entity, label = self.samples[idx]
         
-        # Process image
         image = Image.open(image_path).convert("RGB")
         image = self.transform(image)
         
-        # Process text
         text = f"{ocr_text} [ENTITY] {entity}"
         encoding = self.tokenizer(
             text,
@@ -103,14 +97,11 @@ class MemeDataset(Dataset):
 class MultiModalClassifier(nn.Module):
     def __init__(self):
         super().__init__()
-        # Text feature extractor
         self.bert = BertModel.from_pretrained(Config.BERT_MODEL_NAME)
         
-        # Image feature extractor
         self.cnn = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
         self.cnn.fc = nn.Identity()
         
-        # Classification head
         self.dropout = nn.Dropout(Config.DROPOUT_RATE)
         self.fc = nn.Sequential(
             nn.Linear(768 + 2048, 512),
